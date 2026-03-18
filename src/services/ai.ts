@@ -174,9 +174,9 @@ Today's date is ${today}.
 ${selectedDate ? `The user is currently viewing the calendar date: ${selectedDate}.` : ''}
 ${activeNotebookId ? `The user is currently viewing the academic notebook with ID: ${activeNotebookId}.` : ''}
 
-You help users manage their tasks and academic notebooks.
-- Use 'manageTasks' to modify calendar tasks.
-- Use 'manageNotebooks' to modify academic notebooks (courses, skills, syllabus).
+IMPORTANT: You already have the current tasks and notebooks in the JSON blocks below. Do NOT use any tool calls if you only need to read or summarize data; simply answer based on the provided JSON.
+Use 'manageTasks' ONLY to create, update, or delete tasks.
+Use 'manageNotebooks' ONLY to create, update, or delete notebooks.
 
 Notebooks contain HTML content. When updating a notebook's content, you can use basic HTML like <p>, <ul>, <li>, <b>, <i>. 
 IMPORTANT: To mark a topic as completed in a notebook, wrap it in <del>...</del> tags. This will automatically sync and mark the corresponding calendar task as completed!
@@ -201,9 +201,9 @@ ${historyText}
   const processOperations = (callName: string, args: any) => {
     if (callName === "manageTasks") {
       const operations = args.operations || [];
-      actionsTaken += operations.length;
-
       for (const op of operations) {
+        if (op.action === 'read') continue;
+        actionsTaken++;
         if (op.action === 'create') {
           updatedTasks.push({
             id: Math.random().toString(36).substring(2, 9),
@@ -236,9 +236,9 @@ ${historyText}
       }
     } else if (callName === "manageNotebooks") {
       const operations = args.operations || [];
-      actionsTaken += operations.length;
-
       for (const op of operations) {
+        if (op.action === 'read') continue;
+        actionsTaken++;
         if (op.action === 'create') {
           updatedNotebooks.push({
             id: Math.random().toString(36).substring(2, 9),
@@ -302,7 +302,11 @@ ${historyText}
           model: "llama-3.3-70b-versatile",
           messages: [
             { role: "system", content: "You are a helpful calendar and academic assistant." },
-            { role: "user", content: `The user asked: "${latestMessage}". I have successfully executed ${actionsTaken} operations on their calendar/notebooks to fulfill this request. Please provide a natural, friendly confirmation to the user explaining what was done. Keep it concise.` }
+            { role: "user", content: `The user asked: "${latestMessage}". 
+I have successfully executed ${actionsTaken} operations on their data to fulfill this request.
+Current Tasks: ${JSON.stringify(updatedTasks)}
+Current Notebooks: ${JSON.stringify(updatedNotebooks)}
+Please provide a natural, friendly confirmation to the user explaining exactly what was done and providing any requested summaries or insights based on their data. Keep it concise but specific.` }
           ],
           temperature: 0.2
         });
@@ -339,8 +343,10 @@ ${historyText}
         const summaryResponse = await ai.models.generateContent({
           model: "gemini-3-flash-preview",
           contents: `The user asked: "${latestMessage}". 
-I have successfully executed ${actionsTaken} operations on their calendar/notebooks to fulfill this request.
-Please provide a natural, friendly confirmation to the user explaining what was done. Keep it concise.`,
+I have successfully executed ${actionsTaken} operations on their data to fulfill this request.
+Current Tasks: ${JSON.stringify(updatedTasks)}
+Current Notebooks: ${JSON.stringify(updatedNotebooks)}
+Please provide a natural, friendly confirmation to the user explaining exactly what was done and providing any requested summaries or insights based on their data. Keep it concise but specific.`,
           config: {
             systemInstruction: "You are a helpful calendar and academic assistant.",
             temperature: 0.2
