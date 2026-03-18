@@ -150,13 +150,17 @@ export default function DayView({ date, tasks, setTasks, onBack }: DayViewProps)
               className="flex-1 bg-transparent outline-none text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 font-medium text-sm"
             />
           </div>
-          <div className="w-32 flex items-center gap-2 bg-gray-50 dark:bg-gray-800 px-3 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 focus-within:border-blue-500 dark:focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all">
-            <Clock className="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0" />
+          <div className="relative w-32 flex items-center gap-2 bg-gray-50 dark:bg-gray-800 px-3 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 focus-within:border-blue-500 dark:focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all cursor-pointer group/time">
+            <Clock className="w-4 h-4 text-gray-400 dark:text-gray-500 shrink-0 group-hover/time:text-blue-500 transition-colors" />
+            <span className="text-gray-400 dark:text-gray-500 font-medium text-sm group-hover/time:text-gray-600 dark:group-hover/time:text-gray-300">
+              {newTaskTime || 'Set time'}
+            </span>
             <input
               type="time"
               value={newTaskTime}
               onChange={e => setNewTaskTime(e.target.value)}
-              className="flex-1 bg-transparent outline-none text-gray-800 dark:text-gray-200 font-medium text-sm"
+              className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+              aria-label="Set task time"
             />
           </div>
           <button

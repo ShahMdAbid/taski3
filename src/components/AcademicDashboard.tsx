@@ -27,13 +27,12 @@ export default function AcademicDashboard({ notebooks, onOpenNotebook, onCreateN
         {/* Create New Card */}
         <button
           onClick={onCreateNotebook}
-          aria-label="Create new notebook"
           className="h-48 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-indigo-400 dark:hover:border-indigo-500 transition-all flex flex-col items-center justify-center gap-3 group"
         >
           <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center group-hover:scale-110 transition-transform">
             <Plus className="w-6 h-6" />
           </div>
-          <span className="font-medium text-gray-600 dark:text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">Create new notebook</span>
+          <span className="font-medium text-gray-600 dark:text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">Add goal</span>
         </button>
 
         {/* Notebook Cards */}
@@ -45,8 +44,7 @@ export default function AcademicDashboard({ notebooks, onOpenNotebook, onCreateN
           >
             <div className="flex justify-between items-start">
               <span className="text-3xl">{notebook.icon}</span>
-              <button 
-                aria-label="Delete notebook"
+              <button
                 onClick={(e) => {
                   e.stopPropagation();
                   if (confirm('Are you sure you want to delete this notebook?')) {
@@ -58,7 +56,7 @@ export default function AcademicDashboard({ notebooks, onOpenNotebook, onCreateN
                 <MoreVertical className="w-5 h-5 text-gray-300" />
               </button>
             </div>
-            
+
             <div>
               <h3 className="font-semibold text-lg line-clamp-2 mb-1">{notebook.title}</h3>
               <p className="text-xs text-gray-400">

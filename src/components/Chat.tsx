@@ -19,7 +19,7 @@ interface ChatProps {
 
 export default function Chat({ tasks, setTasks, notebooks, setNotebooks, activeNotebookId, selectedDate, activeApiKey, activeGroqKey, aiProvider = 'gemini', onClose }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([
-    { id: '1', role: 'model', content: 'Hi! I am your AI assistant. I can help you schedule tasks or manage your academic notebooks. What would you like to do today?' }
+    { id: '1', role: 'model', content: 'Hi! I am your AI assistant. I can help you schedule tasks or manage your goals. What would you like to do today?' }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
