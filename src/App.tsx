@@ -280,8 +280,8 @@ export default function App() {
               Settings
             </button>
           </div>
-          <div className="p-4 border-t border-gray-800 text-xs text-gray-500">
-            Local Storage Active
+          <div className="p-4 border-t border-gray-800 text-xs text-gray-500 opacity-80 leading-relaxed text-center">
+            Your data is stored locally on this device and is never sent to a server.
           </div>
         </div>
       )}
