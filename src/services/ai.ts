@@ -170,10 +170,8 @@ export async function processChat(
   const today = format(new Date(), 'yyyy-MM-dd');
   let historyText = messages.slice(0, -1).map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n');
 
-  const systemInstruction = `You are a smart, empathetic, and highly concise productivity coach. Your goal is to help the user manage their routine without sounding like a robot.
-Today's date is ${today}.
-${selectedDate ? `The user is currently viewing the calendar date: ${selectedDate}.` : ''}
-${activeNotebookId ? `The user is currently viewing the academic notebook with ID: ${activeNotebookId}.` : ''}
+  const baseSystemInstruction = `You are a smart, empathetic, and highly concise productivity coach.
+${knowledgeBank ? `\nUSER'S KNOWLEDGE BANK (HIGHEST PRIORITY):\n${knowledgeBank}\n` : ''}
 
 CORE RULES:
 1. BE CONCISE: Never use 50 words when 10 will do.
@@ -183,9 +181,12 @@ CORE RULES:
 5. FORMATTING: Use **bolding**, bullet points, and occasional Emojis to make your text highly scannable for a mobile app interface.
 6. DATA HANDLING: You have current tasks and notebooks in JSON below. Do NOT use tool calls to read data. Simply use the JSON.
 7. TOOLS: Use 'manageTasks' and 'manageNotebooks' ONLY for creating/updating/deleting.
-8. NOTEBOOKS: Use HTML (<p>, <ul>, <li>, <b>, <i>). Use <del>...</del> to mark topics as done for auto-sync with calendar.
+8. NOTEBOOKS: Use HTML (<p>, <ul>, <li>, <b>, <i>). Use <del>...</del> to mark topics as done for auto-sync with calendar.`;
 
-${knowledgeBank ? `USER'S KNOWLEDGE BANK (CUSTOM OVERRIDES):\n${knowledgeBank}` : ''}
+  const systemInstruction = `${baseSystemInstruction}
+Today's date is ${today}.
+${selectedDate ? `The user is currently viewing the calendar date: ${selectedDate}.` : ''}
+${activeNotebookId ? `The user is currently viewing the academic notebook with ID: ${activeNotebookId}.` : ''}
 
 Current Tasks (JSON):
 ${JSON.stringify(currentTasks, null, 2)}
@@ -306,7 +307,7 @@ ${historyText}
         const summaryResponse = await groq.chat.completions.create({
           model: "llama-3.3-70b-versatile",
           messages: [
-            { role: "system", content: "You are a helpful calendar and academic assistant." },
+            { role: "system", content: baseSystemInstruction },
             { role: "user", content: `The user asked: "${latestMessage}". 
 I have successfully executed ${actionsTaken} operations on their data to fulfill this request.
 Current Tasks: ${JSON.stringify(updatedTasks)}
@@ -327,9 +328,18 @@ Please provide a natural, friendly confirmation to the user explaining exactly w
 
     const ai = new GoogleGenAI({ apiKey });
 
+    // Format history and current message for Gemini SDK
+    const contents = [
+      ...messages.slice(0, -1).map(m => ({
+        role: m.role === 'model' ? 'model' : 'user',
+        parts: [{ text: m.content }]
+      })),
+      { role: 'user', parts: [{ text: latestMessage }] }
+    ];
+
     const response = await ai.models.generateContent({
-      model: "gemini-3.1-pro-preview",
-      contents: latestMessage,
+      model: "gemini-2.0-flash", // Using stable 2.0 Flash for reliability, matching rule's intent
+      contents: contents as any,
       config: {
         systemInstruction,
         tools: [{ functionDeclarations: [manageTasksDeclaration, manageNotebooksDeclaration] }],
@@ -346,14 +356,14 @@ Please provide a natural, friendly confirmation to the user explaining exactly w
 
       if (actionsTaken > 0) {
         const summaryResponse = await ai.models.generateContent({
-          model: "gemini-3-flash-preview",
-          contents: `The user asked: "${latestMessage}". 
+          model: "gemini-2.0-flash",
+          contents: [{ role: 'user', parts: [{ text: `The user asked: "${latestMessage}". 
 I have successfully executed ${actionsTaken} operations on their data to fulfill this request.
 Current Tasks: ${JSON.stringify(updatedTasks)}
 Current Notebooks: ${JSON.stringify(updatedNotebooks)}
-Please provide a natural, friendly confirmation to the user explaining exactly what was done and providing any requested summaries or insights based on their data. Keep it concise but specific.`,
+Please provide a natural, friendly confirmation to the user explaining exactly what was done and providing any requested summaries or insights based on their data. Keep it concise but specific.` }] }],
           config: {
-            systemInstruction: "You are a helpful calendar and academic assistant.",
+            systemInstruction: baseSystemInstruction,
             temperature: 0.2
           }
         });
@@ -362,5 +372,14 @@ Please provide a natural, friendly confirmation to the user explaining exactly w
     }
   }
 
-  return { reply, updatedTasks, updatedNotebooks };
+  // Final check to prevent empty bubbles
+  if (!reply || reply.trim() === "") {
+    if (actionsTaken > 0) {
+      reply = `I have successfully updated your data with ${actionsTaken} operation(s). ✅`;
+    } else {
+      reply = "I've analyzed your data. How can I help you today? 😊";
+    }
+  }
+
+  return { reply: reply.trim(), updatedTasks, updatedNotebooks };
 }

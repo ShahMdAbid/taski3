@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2, X, Sparkles, BookOpen } from 'lucide-react';
+import { Send, User, Bot, Sparkles, X, Plus, Trash2, Edit2, Check, BookOpen, Save, RotateCcw, Loader2 } from 'lucide-react';
 import { Task, Message, Notebook } from '../types';
 import { cn } from '../lib/utils';
 import { processChat } from '../services/ai';
@@ -40,6 +40,22 @@ export default function Chat({
   const [isLoading, setIsLoading] = useState(false);
   const [isManagingPresets, setIsManagingPresets] = useState(false);
   const [isKnowledgeBankOpen, setIsKnowledgeBankOpen] = useState(false);
+  const [draftKnowledgeBank, setDraftKnowledgeBank] = useState(knowledgeBank);
+
+  // Sync draft when global knowledgeBank changes (e.g., on mount)
+  useEffect(() => {
+    setDraftKnowledgeBank(knowledgeBank);
+  }, [knowledgeBank]);
+
+  const handleSaveKnowledgeBank = () => {
+    setKnowledgeBank(draftKnowledgeBank);
+    setIsKnowledgeBankOpen(false);
+  };
+
+  const handleResetKnowledgeBank = () => {
+    setDraftKnowledgeBank('');
+    setKnowledgeBank('');
+  };
   const [newPreset, setNewPreset] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -154,14 +170,32 @@ export default function Chat({
             </button>
           </div>
           <textarea
-            value={knowledgeBank}
-            onChange={(e) => setKnowledgeBank(e.target.value)}
+            value={draftKnowledgeBank}
+            onChange={(e) => setDraftKnowledgeBank(e.target.value)}
             placeholder="Tell the AI how to behave (e.g., 'Always be concise', 'Focus on my academic hub goals', 'Use a helpful tone')..."
             className="w-full h-24 bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-900/50 rounded-xl p-3 text-sm focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all dark:text-gray-200 resize-none"
           />
-          <p className="mt-2 text-[10px] text-purple-600/70 dark:text-purple-400/50 italic">
-            Instructions saved automatically. AI will follow these for all future messages.
-          </p>
+          <div className="mt-3 flex items-center justify-between">
+            <div className="flex gap-2">
+              <button
+                onClick={handleSaveKnowledgeBank}
+                className="px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5"
+              >
+                <Save className="w-3 h-3" />
+                Save Instructions
+              </button>
+              <button
+                onClick={handleResetKnowledgeBank}
+                className="px-3 py-1.5 bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-900/50 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 text-xs font-medium rounded-lg transition-colors flex items-center gap-1.5"
+              >
+                <RotateCcw className="w-3 h-3" />
+                Reset
+              </button>
+            </div>
+            <p className="text-[10px] text-purple-600/70 dark:text-purple-400/50 italic">
+              AI uses these instructions for all future messages.
+            </p>
+          </div>
         </div>
       )}
       
