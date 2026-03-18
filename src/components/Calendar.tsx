@@ -89,10 +89,10 @@ export default function Calendar({ tasks, onToggleTask, onDateClick }: CalendarP
           {format(currentDate, 'MMMM yyyy')}
         </h2>
         <div className="flex gap-2">
-          <button onClick={prevMonth} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+          <button onClick={prevMonth} aria-label="Previous month" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
             <ChevronLeft className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           </button>
-          <button onClick={nextMonth} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
+          <button onClick={nextMonth} aria-label="Next month" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors">
             <ChevronRight className="w-5 h-5 text-gray-600 dark:text-gray-400" />
           </button>
         </div>

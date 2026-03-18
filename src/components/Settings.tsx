@@ -70,7 +70,7 @@ export default function Settings({
   return (
     <div className="max-w-4xl mx-auto bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden flex flex-col h-full transition-colors duration-200">
       <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 flex items-center gap-4 sticky top-0 z-10 shrink-0 transition-colors duration-200">
-        <button onClick={onBack} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
+        <button onClick={onBack} aria-label="Go back" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200">
           <ArrowLeft className="w-5 h-5" />
         </button>
         <h2 className="text-xl font-bold text-gray-800 dark:text-white tracking-tight">Settings</h2>
@@ -91,6 +91,7 @@ export default function Settings({
             </div>
             <button 
               onClick={() => setIsDarkMode(!isDarkMode)}
+              aria-label="Toggle dark mode"
               className={cn("w-12 h-6 rounded-full transition-colors relative", isDarkMode ? "bg-indigo-600" : "bg-gray-300")}
             >
               <div className={cn("w-4 h-4 rounded-full bg-white absolute top-1 transition-transform", isDarkMode ? "translate-x-7" : "translate-x-1")} />
@@ -171,7 +172,7 @@ export default function Settings({
                       <span className="font-mono text-sm text-gray-700 dark:text-gray-300">{maskKey(key)}</span>
                       {activeKeyIndex === index && <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/50 px-2 py-0.5 rounded-full">Active</span>}
                     </div>
-                    <button onClick={() => removeKey(index)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                    <button onClick={() => removeKey(index)} aria-label="Remove API key" className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
@@ -221,7 +222,7 @@ export default function Settings({
                       <span className="font-mono text-sm text-gray-700 dark:text-gray-300">{maskKey(key)}</span>
                       {activeGroqKeyIndex === index && <span className="text-xs font-medium text-orange-600 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/50 px-2 py-0.5 rounded-full">Active</span>}
                     </div>
-                    <button onClick={() => removeGroqKey(index)} className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                    <button onClick={() => removeGroqKey(index)} aria-label="Remove Groq API key" className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>

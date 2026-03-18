@@ -84,6 +84,7 @@ export default function Chat({ tasks, setTasks, notebooks, setNotebooks, activeN
         {onClose && (
           <button 
             onClick={onClose}
+            aria-label="Close chat"
             className="lg:hidden p-2 hover:bg-gray-200 dark:hover:bg-gray-800 rounded-full text-gray-500 dark:text-gray-400 transition-colors"
           >
             <X className="w-5 h-5" />
@@ -136,6 +137,7 @@ export default function Chat({ tasks, setTasks, notebooks, setNotebooks, activeN
           />
           <button 
             onClick={handleSend}
+            aria-label="Send message"
             disabled={!input.trim() || isLoading}
             className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/50 rounded-full disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
           >

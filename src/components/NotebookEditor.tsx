@@ -38,7 +38,7 @@ export default function NotebookEditor({ notebook, onUpdate, onBack }: Props) {
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex flex-col gap-4 sticky top-0 bg-white dark:bg-gray-900 z-10 transition-colors duration-200">
         <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors text-gray-500 dark:text-gray-400">
+          <button onClick={onBack} aria-label="Go back" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors text-gray-500 dark:text-gray-400">
             <ArrowLeft className="w-5 h-5" />
           </button>
           
@@ -68,13 +68,13 @@ export default function NotebookEditor({ notebook, onUpdate, onBack }: Props) {
 
         {/* Toolbar */}
         <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800/50 p-2 rounded-lg border border-gray-200 dark:border-gray-700">
-          <button onClick={() => exec('bold')} className="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-md transition-colors text-gray-700 dark:text-gray-300 hover:shadow-sm" title="Bold">
+          <button onClick={() => exec('bold')} aria-label="Bold" className="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-md transition-colors text-gray-700 dark:text-gray-300 hover:shadow-sm" title="Bold">
             <Bold className="w-4 h-4" />
           </button>
-          <button onClick={() => exec('italic')} className="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-md transition-colors text-gray-700 dark:text-gray-300 hover:shadow-sm" title="Italic">
+          <button onClick={() => exec('italic')} aria-label="Italic" className="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-md transition-colors text-gray-700 dark:text-gray-300 hover:shadow-sm" title="Italic">
             <Italic className="w-4 h-4" />
           </button>
-          <button onClick={() => exec('strikeThrough')} className="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-md transition-colors text-gray-700 dark:text-gray-300 hover:shadow-sm" title="Strikethrough (Syncs with Calendar)">
+          <button onClick={() => exec('strikeThrough')} aria-label="Strikethrough" className="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-md transition-colors text-gray-700 dark:text-gray-300 hover:shadow-sm" title="Strikethrough (Syncs with Calendar)">
             <Strikethrough className="w-4 h-4" />
           </button>
           
@@ -85,6 +85,7 @@ export default function NotebookEditor({ notebook, onUpdate, onBack }: Props) {
             {colors.map(color => (
               <button
                 key={color}
+                aria-label={`Set text color to ${color}`}
                 onClick={() => exec('foreColor', color)}
                 className="w-6 h-6 rounded-full border border-gray-200 dark:border-gray-700 hover:scale-110 transition-transform"
                 style={{ backgroundColor: color }}

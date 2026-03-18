@@ -215,6 +215,7 @@ export default function App() {
             </h2>
             <button 
               onClick={() => setIsSidebarOpen(false)}
+              aria-label="Close sidebar"
               className="p-1.5 hover:bg-gray-800 rounded-lg transition-colors text-gray-400 hover:text-white"
             >
               <X className="w-5 h-5" />
@@ -254,6 +255,7 @@ export default function App() {
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+              aria-label="Toggle sidebar"
               className="p-2 -ml-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors text-gray-600 dark:text-gray-300"
             >
               <Menu className="w-5 h-5" />
@@ -320,6 +322,7 @@ export default function App() {
         {!isChatOpen && (
           <button
             onClick={() => setIsChatOpen(true)}
+            aria-label="Open chat"
             className="lg:hidden fixed bottom-6 right-6 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg flex items-center justify-center hover:bg-blue-700 transition-colors z-40"
           >
             <MessageSquare className="w-6 h-6" />
