@@ -5,9 +5,10 @@ import DayView from './components/DayView';
 import SettingsView from './components/Settings';
 import AcademicDashboard from './components/AcademicDashboard';
 import NotebookEditor from './components/NotebookEditor';
-import { Task, Notebook } from './types';
+import ExpenseTracker from './components/ExpenseTracker';
+import { Task, Notebook, Expense } from './types';
 import { format } from 'date-fns';
-import { Menu, X, Calendar as CalendarIcon, Settings, CheckSquare, BookOpen, MessageSquare } from 'lucide-react';
+import { Menu, X, Calendar as CalendarIcon, Settings, CheckSquare, BookOpen, MessageSquare, Wallet } from 'lucide-react';
 import { cn } from './lib/utils';
 
 export default function App() {
@@ -35,6 +36,10 @@ export default function App() {
     const saved = localStorage.getItem('activeGroqKeyIndex');
     return saved ? parseInt(saved, 10) : 0;
   });
+  const [expenses, setExpenses] = useState<Expense[]>(() => {
+    const saved = localStorage.getItem('expenses');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [aiProvider, setAiProvider] = useState<'gemini' | 'groq'>(() => {
     const saved = localStorage.getItem('aiProvider');
     return (saved as 'gemini' | 'groq') || 'gemini';
@@ -57,7 +62,7 @@ export default function App() {
   });
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [currentView, setCurrentView] = useState<'calendar' | 'settings' | 'academic'>('calendar');
+  const [currentView, setCurrentView] = useState<'calendar' | 'settings' | 'academic' | 'expenses'>('calendar');
   const [activeNotebookId, setActiveNotebookId] = useState<string | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -69,6 +74,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('notebooks', JSON.stringify(notebooks));
   }, [notebooks]);
+
+  useEffect(() => {
+    localStorage.setItem('expenses', JSON.stringify(expenses));
+  }, [expenses]);
 
   useEffect(() => {
     localStorage.setItem('apiKeys', JSON.stringify(apiKeys));
@@ -257,6 +266,13 @@ export default function App() {
               Academic Hub
             </button>
             <button 
+              onClick={() => { setCurrentView('expenses'); setSelectedDate(null); setActiveNotebookId(null); setIsSidebarOpen(false); }}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium text-left"
+            >
+              <Wallet className="w-4 h-4 text-gray-400" />
+              Expense Tracker
+            </button>
+            <button 
               onClick={() => { setCurrentView('settings'); setSelectedDate(null); setActiveNotebookId(null); setIsSidebarOpen(false); }}
               className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium text-left"
             >
@@ -322,6 +338,13 @@ export default function App() {
                 onDeleteNotebook={handleDeleteNotebook} 
               />
             )
+          ) : currentView === 'expenses' ? (
+            <ExpenseTracker 
+              expenses={expenses}
+              onBack={() => setCurrentView('calendar')}
+              onAddExpense={(newExp) => setExpenses(prev => [{ ...newExp, id: Math.random().toString(36).substring(2, 9) }, ...prev])}
+              onDeleteExpense={(id) => setExpenses(prev => prev.filter(e => e.id !== id))}
+            />
           ) : selectedDate ? (
             <DayView 
               date={selectedDate} 
@@ -377,6 +400,8 @@ export default function App() {
           setChatPresets={setChatPresets}
           knowledgeBank={knowledgeBank}
           setKnowledgeBank={setKnowledgeBank}
+          expenses={expenses}
+          setExpenses={setExpenses}
           onClose={() => setIsChatOpen(false)}
         />
       </div>

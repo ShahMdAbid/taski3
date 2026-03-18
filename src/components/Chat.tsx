@@ -18,8 +18,47 @@ interface Props {
   setChatPresets: React.Dispatch<React.SetStateAction<string[]>>;
   knowledgeBank: string;
   setKnowledgeBank: (val: string) => void;
+  expenses: any[];
+  setExpenses: React.Dispatch<React.SetStateAction<any[]>>;
   onClose?: () => void;
 }
+
+const MarkdownText = ({ content, role }: { content: string, role: 'user' | 'model' }) => {
+  const lines = content.split('\n');
+  return (
+    <div className="space-y-1">
+      {lines.map((line, i) => {
+        const isBullet = line.trim().startsWith('* ');
+        const cleanLine = isBullet ? line.trim().substring(2) : line;
+
+        // Process bold text using regex: **text** -> <strong>text</strong>
+        // We handle the case where ** might be nested or multiple times in a line
+        const parts = cleanLine.split(/(\*\*.*?\*\*)/g);
+        const renderedLine = parts.map((part, j) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            return (
+              <strong key={j} className={cn("font-bold", role === 'user' ? "text-white" : "text-gray-900 dark:text-gray-100")}>
+                {part.slice(2, -2)}
+              </strong>
+            );
+          }
+          return <span key={j}>{part}</span>;
+        });
+
+        if (isBullet) {
+          return (
+            <div key={i} className="flex gap-2 ml-1">
+              <span className={cn("mt-1", role === 'user' ? "text-blue-100" : "text-blue-500 dark:text-blue-400")}>•</span>
+              <span className="flex-1">{renderedLine}</span>
+            </div>
+          );
+        }
+
+        return <p key={i} className="min-h-[1em]">{renderedLine}</p>;
+      })}
+    </div>
+  );
+};
 
 export default function Chat({ 
   tasks, setTasks, notebooks, setNotebooks, 
@@ -27,6 +66,7 @@ export default function Chat({
   activeApiKey, activeGroqKey, aiProvider,
   chatPresets, setChatPresets,
   knowledgeBank, setKnowledgeBank,
+  expenses, setExpenses,
   onClose 
 }: Props) {
   const [messages, setMessages] = useState<Message[]>([
@@ -77,10 +117,11 @@ export default function Chat({
     setIsLoading(true);
 
     try {
-      const { reply, updatedTasks, updatedNotebooks } = await processChat(
+      const result = await processChat(
         [...messages, userMsg], 
         tasks, 
         notebooks, 
+        expenses,
         activeNotebookId, 
         selectedDate, 
         activeApiKey,
@@ -89,11 +130,16 @@ export default function Chat({
         knowledgeBank
       );
       
+      const { reply, updatedTasks, updatedNotebooks, updatedExpenses } = result;
+
       if (updatedTasks) {
         setTasks(updatedTasks);
       }
       if (updatedNotebooks) {
         setNotebooks(updatedNotebooks);
+      }
+      if (updatedExpenses) {
+        setExpenses(updatedExpenses);
       }
 
       setMessages(prev => [...prev, { id: Date.now().toString(), role: 'model', content: reply }]);
@@ -213,7 +259,7 @@ export default function Chat({
               msg.role === 'user' ? "bg-blue-600 text-white rounded-tr-none dark:bg-blue-700" : "bg-gray-100 text-gray-800 rounded-tl-none dark:bg-gray-800 dark:text-gray-200",
               msg.isError && "bg-red-50 text-red-600 border border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800"
             )}>
-              {msg.content}
+              <MarkdownText content={msg.content} role={msg.role} />
             </div>
           </div>
         ))}
@@ -285,21 +331,32 @@ export default function Chat({
           </form>
         )}
 
-        <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all">
-          <input
-            type="text"
+        <div className="flex items-end gap-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-[24px] px-4 py-3 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all">
+          <textarea
             value={input}
             onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && handleSend()}
+            onKeyDown={e => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
             placeholder="Ask me to schedule something..."
-            className="flex-1 bg-transparent outline-none text-sm text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
+            rows={1}
+            className="flex-1 bg-transparent outline-none text-sm text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 resize-none max-h-32 overflow-y-auto pt-0.5"
             disabled={isLoading || isManagingPresets}
+            ref={(el) => {
+              if (el) {
+                el.style.height = 'auto'; // Reset height
+                el.style.height = `${el.scrollHeight}px`; // Set to scrollHeight
+              }
+            }}
           />
           <button 
             onClick={() => handleSend()}
             aria-label="Send message"
             disabled={!input.trim() || isLoading || isManagingPresets}
-            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/50 rounded-full disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
+            className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/50 rounded-full disabled:opacity-50 disabled:hover:bg-transparent transition-colors mb-0.5"
           >
             <Send className="w-4 h-4" />
           </button>

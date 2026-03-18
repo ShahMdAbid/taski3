@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { format, parseISO } from 'date-fns';
-import { ArrowLeft, Plus, Trash2, Clock, CheckCircle2, Circle, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Clock, CheckCircle2, Circle, MessageSquare, Sparkles } from 'lucide-react';
 import { Task } from '../types';
 import { cn } from '../lib/utils';
 
@@ -14,6 +14,9 @@ interface DayViewProps {
 export default function DayView({ date, tasks, setTasks, onBack }: DayViewProps) {
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskTime, setNewTaskTime] = useState('');
+  const [isImportant, setIsImportant] = useState(false);
+  const [isHealth, setIsHealth] = useState(false);
+  const [isSpiritual, setIsSpiritual] = useState(false);
   const timeInputRef = useRef<HTMLInputElement>(null);
 
   const dayTasks = tasks
@@ -29,12 +32,18 @@ export default function DayView({ date, tasks, setTasks, onBack }: DayViewProps)
       title: newTaskTitle.trim(),
       date: date,
       time: newTaskTime || undefined,
-      completed: false
+      completed: false,
+      isImportant: isImportant,
+      isHealth: isHealth,
+      isSpiritual: isSpiritual
     };
 
     setTasks(prev => [...prev, newTask]);
     setNewTaskTitle('');
     setNewTaskTime('');
+    setIsImportant(false);
+    setIsHealth(false);
+    setIsSpiritual(false);
   };
 
   const toggleTask = (id: string) => {
@@ -85,7 +94,13 @@ export default function DayView({ date, tasks, setTasks, onBack }: DayViewProps)
                   "group flex flex-col p-4 rounded-xl border transition-all duration-200",
                   task.completed 
                     ? "bg-gray-50 dark:bg-gray-800/50 border-gray-200 dark:border-gray-800 opacity-75" 
-                    : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700"
+                    : task.isImportant
+                      ? "bg-red-50 dark:bg-red-900/10 border-red-200 dark:border-red-900 shadow-sm hover:shadow-md hover:border-red-300 dark:hover:border-red-700"
+                      : task.isHealth
+                        ? "bg-emerald-50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-900 shadow-sm hover:shadow-md hover:border-emerald-300 dark:hover:border-emerald-700"
+                        : task.isSpiritual
+                          ? "bg-purple-50 dark:bg-purple-900/10 border-purple-200 dark:border-purple-900 shadow-sm hover:shadow-md hover:border-purple-300 dark:hover:border-purple-700"
+                          : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md hover:border-blue-300 dark:hover:border-blue-700"
                 )}
               >
                 <div className="flex items-center justify-between">
@@ -94,12 +109,31 @@ export default function DayView({ date, tasks, setTasks, onBack }: DayViewProps)
                       aria-label={task.completed ? "Mark task as incomplete" : "Mark task as complete"}
                       className={cn(
                       "transition-colors shrink-0",
-                      task.completed ? "text-gray-400 dark:text-gray-500" : "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
+                      task.completed 
+                        ? "text-gray-400 dark:text-gray-500" 
+                        : task.isImportant
+                          ? "text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+                          : task.isHealth
+                            ? "text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300"
+                            : task.isSpiritual
+                              ? "text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300"
+                              : "text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300"
                     )}>
                       {task.completed ? <CheckCircle2 className="w-6 h-6" /> : <Circle className="w-6 h-6" />}
                     </button>
                     <div className={cn("flex flex-col", task.completed && "line-through text-gray-500 dark:text-gray-400")}>
-                      <span className={cn("text-base font-medium", task.completed ? "text-gray-500 dark:text-gray-400" : "text-gray-800 dark:text-gray-200")}>
+                      <span className={cn(
+                        "text-base font-medium", 
+                        task.completed 
+                          ? "text-gray-500 dark:text-gray-400" 
+                          : task.isImportant
+                            ? "text-red-800 dark:text-red-200"
+                            : task.isHealth
+                              ? "text-emerald-800 dark:text-emerald-200"
+                              : task.isSpiritual
+                                ? "text-purple-800 dark:text-purple-200"
+                                : "text-gray-800 dark:text-gray-200"
+                      )}>
                         {task.title}
                       </span>
                       {task.time && (
@@ -167,6 +201,59 @@ export default function DayView({ date, tasks, setTasks, onBack }: DayViewProps)
               className="absolute inset-0 opacity-0 pointer-events-none"
               aria-label="Set task time"
             />
+          </div>
+          <div className="flex gap-1 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                setIsImportant(!isImportant);
+                setIsHealth(false);
+                setIsSpiritual(false);
+              }}
+              className={cn(
+                "w-10 h-10 rounded-lg border transition-all flex items-center justify-center text-sm font-semibold",
+                isImportant 
+                  ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 shadow-sm" 
+                  : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors"
+              )}
+              title="Evaluating Term (E) - e.g. Exam, Deadline"
+            >
+              E
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsHealth(!isHealth);
+                setIsImportant(false);
+                setIsSpiritual(false);
+              }}
+              className={cn(
+                "w-10 h-10 rounded-lg border transition-all flex items-center justify-center text-sm font-semibold",
+                isHealth 
+                  ? "bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-900 text-emerald-600 dark:text-emerald-400 shadow-sm" 
+                  : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-900/10 transition-colors"
+              )}
+              title="Health (H) - e.g. Workout, Diet"
+            >
+              H
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsSpiritual(!isSpiritual);
+                setIsImportant(false);
+                setIsHealth(false);
+              }}
+              className={cn(
+                "w-10 h-10 rounded-lg border transition-all flex items-center justify-center text-sm font-semibold",
+                isSpiritual 
+                  ? "bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-900 text-purple-600 dark:text-purple-400 shadow-sm" 
+                  : "bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400 dark:text-gray-500 hover:text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/10 transition-colors"
+              )}
+              title="Spiritual (S) - e.g. Prayer, Meditation"
+            >
+              S
+            </button>
           </div>
           <button
             type="submit"

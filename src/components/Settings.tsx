@@ -115,7 +115,6 @@ export default function Settings({
               </div>
               <div>
                 <p className="font-semibold text-gray-800 dark:text-white">Google Gemini</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">gemini-3.1-pro-preview</p>
               </div>
             </label>
             <label className={cn("flex-1 p-4 rounded-xl border-2 cursor-pointer transition-all flex items-center gap-3", aiProvider === 'groq' ? "border-orange-500 bg-orange-50/50 dark:bg-orange-900/20" : "border-gray-200 dark:border-gray-700 hover:border-orange-300")}>
@@ -125,7 +124,6 @@ export default function Settings({
               </div>
               <div>
                 <p className="font-semibold text-gray-800 dark:text-white">Groq</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">llama-3.3-70b-versatile</p>
               </div>
             </label>
           </div>

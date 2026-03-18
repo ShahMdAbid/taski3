@@ -5,6 +5,9 @@ export interface Task {
   time?: string; // HH:mm
   completed: boolean;
   comment?: string;
+  isImportant?: boolean;
+  isHealth?: boolean;
+  isSpiritual?: boolean;
 }
 
 export interface Notebook {
@@ -20,4 +23,11 @@ export interface Message {
   role: 'user' | 'model' | 'system';
   content: string;
   isError?: boolean;
+}
+
+export interface Expense {
+  id: string;
+  amount: number;
+  reason?: string;
+  date: string; // YYYY-MM-DD
 }

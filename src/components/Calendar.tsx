@@ -53,12 +53,16 @@ export default function Calendar({ tasks, onToggleTask, onDateClick }: CalendarP
             </span>
           </div>
           <div className="mt-2 flex-1 overflow-y-auto space-y-1 custom-scrollbar">
-            {dayTasks.map(task => (
+            {dayTasks.filter(task => !task.isHealth && !task.isSpiritual).map(task => (
               <div 
                 key={task.id} 
                 className={cn(
                   "text-xs p-1.5 rounded truncate flex items-center gap-1.5 transition-colors",
-                  task.completed ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 line-through" : "bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800/60"
+                  task.completed 
+                    ? "bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 line-through" 
+                    : task.isImportant
+                      ? "bg-red-100 dark:bg-red-900/40 text-red-800 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800/60 font-medium"
+                      : "bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800/60"
                 )}
                 onClick={(e) => {
                   e.stopPropagation();
