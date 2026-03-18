@@ -163,7 +163,8 @@ export async function processChat(
   selectedDate: string | null,
   customApiKey?: string,
   groqApiKey?: string,
-  aiProvider: 'gemini' | 'groq' = 'gemini'
+  aiProvider: 'gemini' | 'groq' = 'gemini',
+  knowledgeBank: string = ""
 ): Promise<{ reply: string, updatedTasks?: Task[], updatedNotebooks?: Notebook[] }> {
 
   const today = format(new Date(), 'yyyy-MM-dd');

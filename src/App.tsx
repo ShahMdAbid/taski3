@@ -51,6 +51,10 @@ export default function App() {
       "What's on my schedule today?"
     ];
   });
+  const [knowledgeBank, setKnowledgeBank] = useState<string>(() => {
+    const saved = localStorage.getItem('knowledgeBank');
+    return saved || "";
+  });
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<'calendar' | 'settings' | 'academic'>('calendar');
@@ -89,6 +93,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('chatPresets', JSON.stringify(chatPresets));
   }, [chatPresets]);
+
+  useEffect(() => {
+    localStorage.setItem('knowledgeBank', knowledgeBank);
+  }, [knowledgeBank]);
 
   useEffect(() => {
     localStorage.setItem('isDarkMode', JSON.stringify(isDarkMode));
@@ -367,6 +375,8 @@ export default function App() {
           aiProvider={aiProvider}
           chatPresets={chatPresets}
           setChatPresets={setChatPresets}
+          knowledgeBank={knowledgeBank}
+          setKnowledgeBank={setKnowledgeBank}
           onClose={() => setIsChatOpen(false)}
         />
       </div>
