@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User, Loader2, X } from 'lucide-react';
+import { Send, Bot, User, Loader2, X, Sparkles } from 'lucide-react';
 import { Task, Message, Notebook } from '../types';
 import { cn } from '../lib/utils';
 import { processChat } from '../services/ai';
 
-interface ChatProps {
+interface Props {
   tasks: Task[];
   setTasks: React.Dispatch<React.SetStateAction<Task[]>>;
   notebooks: Notebook[];
@@ -13,16 +13,30 @@ interface ChatProps {
   selectedDate: string | null;
   activeApiKey?: string;
   activeGroqKey?: string;
-  aiProvider?: 'gemini' | 'groq';
+  aiProvider: 'gemini' | 'groq';
+  chatPresets: string[];
+  setChatPresets: React.Dispatch<React.SetStateAction<string[]>>;
   onClose?: () => void;
 }
 
-export default function Chat({ tasks, setTasks, notebooks, setNotebooks, activeNotebookId, selectedDate, activeApiKey, activeGroqKey, aiProvider = 'gemini', onClose }: ChatProps) {
+export default function Chat({ 
+  tasks, setTasks, notebooks, setNotebooks, 
+  activeNotebookId, selectedDate, 
+  activeApiKey, activeGroqKey, aiProvider,
+  chatPresets, setChatPresets,
+  onClose 
+}: Props) {
   const [messages, setMessages] = useState<Message[]>([
-    { id: '1', role: 'model', content: 'Hi! I am your AI assistant. I can help you schedule tasks or manage your goals. What would you like to do today?' }
+    { 
+      id: '1', 
+      role: 'model', 
+      content: "Hello! I'm your academic assistant. I can help you schedule tasks, manage your goals, or answer questions about your notebooks. What's on your mind?" 
+    }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isManagingPresets, setIsManagingPresets] = useState(false);
+  const [newPreset, setNewPreset] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -33,12 +47,13 @@ export default function Chat({ tasks, setTasks, notebooks, setNotebooks, activeN
     scrollToBottom();
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  const handleSend = async (customContent?: string) => {
+    const textToSend = customContent || input;
+    if (!textToSend.trim() || isLoading) return;
 
-    const userMsg: Message = { id: Date.now().toString(), role: 'user', content: input.trim() };
+    const userMsg: Message = { id: Date.now().toString(), role: 'user', content: textToSend.trim() };
     setMessages(prev => [...prev, userMsg]);
-    setInput('');
+    if (!customContent) setInput('');
     setIsLoading(true);
 
     try {
@@ -67,6 +82,17 @@ export default function Chat({ tasks, setTasks, notebooks, setNotebooks, activeN
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const addPreset = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPreset.trim()) return;
+    setChatPresets(prev => [...prev, newPreset.trim()]);
+    setNewPreset('');
+  };
+
+  const removePreset = (index: number) => {
+    setChatPresets(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -125,6 +151,59 @@ export default function Chat({ tasks, setTasks, notebooks, setNotebooks, activeN
       </div>
 
       <div className="p-4 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 transition-colors duration-200">
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex flex-wrap gap-2">
+            {chatPresets.map((preset, i) => (
+              <div key={i} className="group relative">
+                <button
+                  onClick={() => handleSend(preset)}
+                  disabled={isLoading || isManagingPresets}
+                  className="text-[10px] sm:text-xs px-3 py-1.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-600 dark:hover:text-blue-400 transition-all border border-gray-200 dark:border-gray-700 hover:border-blue-200 dark:hover:border-blue-800 whitespace-nowrap"
+                >
+                  {preset}
+                </button>
+                {isManagingPresets && (
+                  <button 
+                    onClick={() => removePreset(i)}
+                    className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-[8px] hover:bg-red-600 shadow-sm"
+                  >
+                    ×
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+          <button 
+            onClick={() => setIsManagingPresets(!isManagingPresets)}
+            className={cn(
+              "p-1.5 rounded-lg transition-colors ml-2",
+              isManagingPresets ? "bg-blue-100 text-blue-600 dark:bg-blue-900/50" : "text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+            )}
+            title={isManagingPresets ? "Done managing" : "Manage presets"}
+          >
+            {isManagingPresets ? <X className="w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+          </button>
+        </div>
+
+        {isManagingPresets && (
+          <form onSubmit={addPreset} className="flex gap-2 mb-4 animate-in slide-in-from-bottom-2 duration-200">
+            <input
+              type="text"
+              value={newPreset}
+              onChange={e => setNewPreset(e.target.value)}
+              placeholder="New preset message..."
+              className="flex-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-1.5 text-xs outline-none focus:border-blue-500 transition-all"
+            />
+            <button 
+              type="submit"
+              disabled={!newPreset.trim()}
+              className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50"
+            >
+              Add
+            </button>
+          </form>
+        )}
+
         <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full px-4 py-2 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-transparent transition-all">
           <input
             type="text"
@@ -133,12 +212,12 @@ export default function Chat({ tasks, setTasks, notebooks, setNotebooks, activeN
             onKeyDown={e => e.key === 'Enter' && handleSend()}
             placeholder="Ask me to schedule something..."
             className="flex-1 bg-transparent outline-none text-sm text-gray-800 dark:text-white placeholder-gray-400 dark:placeholder-gray-500"
-            disabled={isLoading}
+            disabled={isLoading || isManagingPresets}
           />
           <button 
-            onClick={handleSend}
+            onClick={() => handleSend()}
             aria-label="Send message"
-            disabled={!input.trim() || isLoading}
+            disabled={!input.trim() || isLoading || isManagingPresets}
             className="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/50 rounded-full disabled:opacity-50 disabled:hover:bg-transparent transition-colors"
           >
             <Send className="w-4 h-4" />

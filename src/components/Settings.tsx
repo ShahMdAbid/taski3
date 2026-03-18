@@ -87,7 +87,6 @@ export default function Settings({
           <div className="flex items-center justify-between p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
             <div>
               <p className="font-medium text-gray-800 dark:text-white">Dark Mode</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Toggle global dark mode theme</p>
             </div>
             <button 
               onClick={() => setIsDarkMode(!isDarkMode)}
@@ -140,7 +139,7 @@ export default function Settings({
               Gemini API Keys
             </h3>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-              Manage your Gemini API keys here. If no keys are provided, the app will use the default system key.{' '}
+              Manage your Gemini API keys here.{' '}
               <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:text-blue-600 hover:underline">
                 Get a Gemini API key
               </a>

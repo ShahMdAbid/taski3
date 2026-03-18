@@ -43,6 +43,14 @@ export default function App() {
     const saved = localStorage.getItem('isDarkMode');
     return saved ? JSON.parse(saved) : false;
   });
+  const [chatPresets, setChatPresets] = useState<string[]>(() => {
+    const saved = localStorage.getItem('chatPresets');
+    return saved ? JSON.parse(saved) : [
+      "Schedule a task for tomorrow",
+      "Summarize my goals",
+      "What's on my schedule today?"
+    ];
+  });
 
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<'calendar' | 'settings' | 'academic'>('calendar');
@@ -77,6 +85,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('aiProvider', aiProvider);
   }, [aiProvider]);
+
+  useEffect(() => {
+    localStorage.setItem('chatPresets', JSON.stringify(chatPresets));
+  }, [chatPresets]);
 
   useEffect(() => {
     localStorage.setItem('isDarkMode', JSON.stringify(isDarkMode));
@@ -353,6 +365,8 @@ export default function App() {
           activeApiKey={apiKeys[activeKeyIndex]} 
           activeGroqKey={groqApiKeys[activeGroqKeyIndex]}
           aiProvider={aiProvider}
+          chatPresets={chatPresets}
+          setChatPresets={setChatPresets}
           onClose={() => setIsChatOpen(false)}
         />
       </div>

@@ -74,7 +74,7 @@ export default function NotebookEditor({ notebook, onUpdate, onBack }: Props) {
           <button onClick={() => exec('italic')} aria-label="Italic" className="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-md transition-colors text-gray-700 dark:text-gray-300 hover:shadow-sm" title="Italic">
             <Italic className="w-4 h-4" />
           </button>
-          <button onClick={() => exec('strikeThrough')} aria-label="Strikethrough" className="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-md transition-colors text-gray-700 dark:text-gray-300 hover:shadow-sm" title="Strikethrough (Syncs with Calendar)">
+          <button onClick={() => exec('strikeThrough')} aria-label="Strikethrough" className="p-2 hover:bg-white dark:hover:bg-gray-700 rounded-md transition-colors text-gray-700 dark:text-gray-300 hover:shadow-sm" title="Strikethrough">
             <Strikethrough className="w-4 h-4" />
           </button>
           

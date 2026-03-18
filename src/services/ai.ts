@@ -17,8 +17,8 @@ const manageTasksDeclaration: FunctionDeclaration = {
           properties: {
             action: {
               type: Type.STRING,
-              description: "The action to perform: 'create', 'update', 'delete'.",
-              enum: ["create", "update", "delete"]
+              description: "The action to perform: 'create', 'update', 'delete', 'read'.",
+              enum: ["create", "update", "delete", "read"]
             },
             taskId: {
               type: Type.STRING,
@@ -67,8 +67,8 @@ const manageNotebooksDeclaration: FunctionDeclaration = {
           properties: {
             action: {
               type: Type.STRING,
-              description: "The action to perform: 'create', 'update', 'delete'.",
-              enum: ["create", "update", "delete"]
+              description: "The action to perform: 'create', 'update', 'delete', 'read'.",
+              enum: ["create", "update", "delete", "read"]
             },
             notebookId: {
               type: Type.STRING,
@@ -109,7 +109,7 @@ const groqManageTasksDeclaration = {
           items: {
             type: "object",
             properties: {
-              action: { type: "string", description: "The action to perform: 'create', 'update', 'delete'.", enum: ["create", "update", "delete"] },
+              action: { type: "string", description: "The action to perform: 'create', 'update', 'delete', 'read'.", enum: ["create", "update", "delete", "read"] },
               taskId: { type: "string", description: "The ID of the task to update or delete. Required for 'update' and 'delete'." },
               title: { type: "string", description: "The title of the task. Required for 'create', optional for 'update'." },
               date: { type: "string", description: "The date of the task in YYYY-MM-DD format. Required for 'create', optional for 'update'." },
@@ -140,7 +140,7 @@ const groqManageNotebooksDeclaration = {
           items: {
             type: "object",
             properties: {
-              action: { type: "string", description: "The action to perform: 'create', 'update', 'delete'.", enum: ["create", "update", "delete"] },
+              action: { type: "string", description: "The action to perform: 'create', 'update', 'delete', 'read'.", enum: ["create", "update", "delete", "read"] },
               notebookId: { type: "string", description: "The ID of the notebook to update or delete. Required for 'update' and 'delete'." },
               title: { type: "string", description: "The title of the notebook. Required for 'create', optional for 'update'." },
               content: { type: "string", description: "The HTML content of the notebook. Use basic HTML tags like <p>, <ul>, <li>, <b>, <i>, <del> for strikethrough. Optional." },
@@ -156,19 +156,19 @@ const groqManageNotebooksDeclaration = {
 };
 
 export async function processChat(
-  messages: Message[], 
-  currentTasks: Task[], 
-  currentNotebooks: Notebook[], 
-  activeNotebookId: string | null, 
-  selectedDate: string | null, 
+  messages: Message[],
+  currentTasks: Task[],
+  currentNotebooks: Notebook[],
+  activeNotebookId: string | null,
+  selectedDate: string | null,
   customApiKey?: string,
   groqApiKey?: string,
   aiProvider: 'gemini' | 'groq' = 'gemini'
 ): Promise<{ reply: string, updatedTasks?: Task[], updatedNotebooks?: Notebook[] }> {
-  
+
   const today = format(new Date(), 'yyyy-MM-dd');
   let historyText = messages.slice(0, -1).map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n');
-  
+
   const systemInstruction = `You are a smart calendar and academic assistant. 
 Today's date is ${today}.
 ${selectedDate ? `The user is currently viewing the calendar date: ${selectedDate}.` : ''}
@@ -202,7 +202,7 @@ ${historyText}
     if (callName === "manageTasks") {
       const operations = args.operations || [];
       actionsTaken += operations.length;
-      
+
       for (const op of operations) {
         if (op.action === 'create') {
           updatedTasks.push({
@@ -229,12 +229,15 @@ ${historyText}
           });
         } else if (op.action === 'delete') {
           updatedTasks = updatedTasks.filter(t => t.id !== op.taskId);
+        } else if (op.action === 'read') {
+          // 'read' is handled implicitly as data is already in context
+          continue;
         }
       }
     } else if (callName === "manageNotebooks") {
       const operations = args.operations || [];
       actionsTaken += operations.length;
-      
+
       for (const op of operations) {
         if (op.action === 'create') {
           updatedNotebooks.push({
@@ -259,6 +262,9 @@ ${historyText}
           });
         } else if (op.action === 'delete') {
           updatedNotebooks = updatedNotebooks.filter(nb => nb.id !== op.notebookId);
+        } else if (op.action === 'read') {
+          // 'read' is handled implicitly as data is already in context
+          continue;
         }
       }
     }
@@ -269,7 +275,7 @@ ${historyText}
       throw new Error("No Groq API key available. Please add one in Settings.");
     }
     const groq = new Groq({ apiKey: groqApiKey, dangerouslyAllowBrowser: true });
-    
+
     const groqMessages = [
       { role: "system", content: systemInstruction },
       ...messages.map(m => ({ role: m.role === 'model' ? 'assistant' : 'user', content: m.content }))
@@ -309,7 +315,7 @@ ${historyText}
     if (!apiKey) {
       throw new Error("No Gemini API key available. Please add one in Settings.");
     }
-    
+
     const ai = new GoogleGenAI({ apiKey });
 
     const response = await ai.models.generateContent({
