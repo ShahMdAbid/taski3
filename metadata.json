@@ -1,0 +1,5 @@
+{
+  "name": "AI Calendar & Task Manager",
+  "description": "A smart task-tracking calendar with an integrated AI assistant that can dynamically manage and reschedule tasks.",
+  "requestFramePermissions": []
+}
