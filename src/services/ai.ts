@@ -269,6 +269,23 @@ export async function processChat(
   const today = format(new Date(), 'yyyy-MM-dd');
   let historyText = lastMessages.slice(0, -1).map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.content}`).join('\n');
 
+  const focusDate = selectedDate || today;
+  const focusDateObj = new Date(focusDate);
+  
+  // Filter tasks to only include those relevant to the current view/context (+/- 15 days)
+  const filteredTasks = currentTasks.filter(t => {
+    const taskDate = new Date(t.date);
+    const diffDays = Math.abs(taskDate.getTime() - focusDateObj.getTime()) / (1000 * 60 * 60 * 24);
+    return diffDays <= 15;
+  });
+
+  // Reduce notebooks size: only include content for the active notebook, others just titles
+  const reducedNotebooks = currentNotebooks.map(nb => {
+    if (nb.id === activeNotebookId) return nb; // Keep content for active one
+    const { content, ...rest } = nb;
+    return { ...rest, hasContent: !!content }; // Strip content from others
+  });
+
   const baseSystemInstruction = `You are a smart, empathetic, and highly concise productivity coach.
 ${knowledgeBank ? `\nUSER'S KNOWLEDGE BANK (HIGHEST PRIORITY):\n${knowledgeBank}\n` : ''}
 
@@ -278,7 +295,7 @@ CORE RULES:
 3. HIDE THE BACKEND: Never use phrases like 'marked as not completed', 'listed in your current tasks', or state the exact year (e.g., 2026) unless necessary.
 4. TONE: Be encouraging but realistic. Avoid cheesy, generic quotes. Offer practical, personalized advice instead.
 5. FORMATTING: Use **bolding**, bullet points, and occasional Emojis to make your text highly scannable for a mobile app interface.
-6. DATA HANDLING: You have current tasks and notebooks in JSON below. Do NOT use tool calls to read data. Simply use the JSON.
+6. DATA HANDLING: You have filtered tasks and notebooks in JSON below. Do NOT use tool calls to read data. Simply use the JSON.
 7. TOOLS: Use 'manageTasks' and 'manageNotebooks' ONLY for creating/updating/deleting.
 8. NOTEBOOKS: Use HTML (<p>, <ul>, <li>, <b>, <i>). Use <del>...</del> to mark topics as done for auto-sync with calendar.
 9. SCHEDULING & EXAMS: 
@@ -300,11 +317,11 @@ Today's date is ${today}.
 ${selectedDate ? `The user is currently viewing the calendar date: ${selectedDate}.` : ''}
 ${activeNotebookId ? `The user is currently viewing the academic notebook with ID: ${activeNotebookId}.` : ''}
 
-Current Tasks (JSON):
-${JSON.stringify(currentTasks, null, 2)}
+Current Tasks (Relevant JSON - +/- 15 days):
+${JSON.stringify(filteredTasks, null, 2)}
 
-Current Notebooks (JSON):
-${JSON.stringify(currentNotebooks, null, 2)}
+Current Notebooks (JSON - content stripped for inactive ones):
+${JSON.stringify(reducedNotebooks, null, 2)}
 
 Previous Conversation History:
 ${historyText}
